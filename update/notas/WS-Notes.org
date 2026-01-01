@@ -1,0 +1,470 @@
+* Web-Scraping with python
+
+- Objetivo : Automatizar procesos de recoleccion de cualquier
+  tipo de dato en la web
+
+
+**Habilidades a aprender**
+
+- analizar html's (parsin html's)
+
+- crear bots (crawlers ? )
+
+- que hacer con el acceso
+
+- extraer data de documentos
+
+
+**Sección del libro**
+
+- parte 1 : aqui aprenderemos la base, la parte mecanica del
+  Web-Scraping.
+
+
+- parte 2 : veremos distintos casos/problemas
+
+
+** Capitulo 1 : nuestro primer Web-Scraper
+
+- objetivo : familiarizarse con las funciones y conceptos
+
+
+*** Conceptos
+
+- HTML (hypertext Markup language : es el lenguaje para
+  crear y estructurar paginas web.
+  contiene texto, imagenes y links (lo que queremos
+  analizar).
+
+  - hipertexto : ya que con esta herramienta conecta
+    con otras paginas web o documentos
+
+
+  - markup : estructura semantica con los tags
+
+
+- CSS : es lo que le da el estilo a la pagina web
+
+  Aqui vemos los colores, capas, etc.
+
+- Java : es lo que le da mayor interaccion a la pagina.
+  Antiguamente no habia en estas paginas o no eran tan
+  sotisficadas. algunos browser desde la terminal ignor-
+  an muchas veces estos 'paquetes' (?).
+
+  aqui pueden aparecer las ventanas emergentes, animaciones
+  , todo lo que se pueda tocar -> interactuar.
+
+
+- Tag : los tags son literalmente para marcar o etiquetar
+  la información. Asì sabra el compilador como tiene que
+  mostrarlo.
+
+  tanto como para mostrar el texto o imagenes.
+  
+- bloque y linea: bloque ocupa todo un bloque, como div o
+  p para el parrafo.
+
+
+- web scraper :  tool used to automate the extraction of raw data from websites
+
+
+-  parser :  mechanism used to analyze and structure that raw data into a meaningful format.
+**** estructura html
+la estructura de los html se crea por medio de los tags
+tales como :
+
+| Etiqueta        | Descripción                                          |
+|-----------------+------------------------------------------------------|
+| <!DOCTYPE>      | Define el tipo de documento                          |
+| <html>          | Define un documento HTML                             |
+| <head>          | Contiene metadatos e información del documento       |
+| <title>         | Define el título del documento                       |
+| <body>          | Define el cuerpo del documento                       |
+| <h1> a <h6>     | Define encabezados HTML (niveles de títulos)         |
+| <p>             | Define un párrafo                                    |
+| <br>            | Inserta un salto de línea                            |
+| <hr>            | Define un cambio temático en el contenido            |
+| <!-- ... -->    | Define un comentario                                 |
+
+
+- head contiene los metadatos, lo que no es visible
+  dentro de la pagina, que puede ser de ayuda para
+  los motores de busqueda, por ejemplo
+
+
+- div sirve para agrupar los elementos como una sola unidad
+  
+
+**** comandos
+
+- \n :
+
+
+
+*** funciones
+
+**** BeautifulSoup
+prettify() : lee el html al igual que .read() de url-lib
+
+
+*** Idea 1 : ver/leer estructura
+
+- empezar a ver las paginas como 'archivos' en el sentido
+  a que dentro de la pagina hay info o archivos que pueden
+  extraerse.
+
+
+- las paginas tienen una estructura jerarquíca, que se
+  construyen con los tags. Para leer el contenido de
+  una pagina, ocuparemos 'urlopen' de la librería url-
+  lib.request.
+
+  por ejemplo, leeremos está pagina:
+
+  http://pythonscraping.com/pages/page1.html
+
+
+#+begin_src python :results output
+html = urlopen('http://pythonscraping.com/pages/page1.html')
+print(html.read())
+#+end_src
+
+su salida nos entrega:
+
+#+begin_example
+b'<html>
+\n<head>
+\n<title>A Useful Page</title>
+\n</head>
+\n<body>
+\n<h1>An Interesting Title</h1>
+
+\n<div>\n
+
+Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
+incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
+exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute
+irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
+pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia
+deserunt mollit anim id est laborum.
+
+\n</div>
+\n</body>\n
+</html>\n'
+#+end_example
+
+
+Como se puede apreciar, esta funciòn permite leer el conetnido de la pagina, capturando su estructura.
+
+vemos que el contendio html esta furcado:
+
+**** html
+
+***** head
+metadatos en este caso 'head 1 = h1' como nuestro titulo
+
+***** body
+
+un div que agrupa el texto. este està dentro del cuerpo
+
+*** idea 2 : acceder a las estructuras
+
+podemos buscar cada una de estas estructuras con BeutifulSoup,primero definimos un objeto de BS.
+
+
+#+begin_src python :results output
+bs = BeautifulSoup(html, 'html.parser')
+#+end_src
+
+podemos buscar un tag simplemente haciendo bs.tag, como por ejemplo:
+
+- bs.h1
+
+- bs.a
+
+el resultado pueden ser dos:
+
+- entrega el contenido del tag
+
+- entrega un None
+
+
+si entrega un None, puede deberse a dos situaciones, o esta mal escrito algo o realmente no existe.
+
+pregunta : como identificar los tags que hay en cada función
+
+pregunta : como avisar ante un error
+
+
+ojo: si ya esta el objeto bs, puedes ocupar prettify() para una mejor visualizacion de la pagina
+
+
+**find_all()** : busca todos los tags, si lo pones un 'p' entregara donde se utilizo las p 
+
+
+#+begin_src python :results output
+
+  tags = set(tag.name for tag in soup.find_all())
+
+    print(tags)
+    
+#+end_src
+
+
+find_all() entrega una lista de objetos, que tienen el atributo .name.
+
+*** idea 3 : evitando errores
+
+
+
+#+begin_src python :results output
+
+  
+try:
+    html = urlopen('http://www.pythonscraping.com/pages/page1.html')
+
+except HTTPError as e:
+    print(e)
+# return null, break, or do some other "Plan B"
+else:
+# program continues. Note: If you return or break in the
+# exception catch, you do not need to use the "else" statement
+    print('pico')
+
+    
+#+end_src
+
+
+#+begin_src python :results output
+
+
+  from urllib.request import urlopen
+  from urllib.error import HTTPError
+  from bs4 import BeautifulSoup
+
+  def getTitle(url):
+      try:
+	  html = urlopen(url)
+      except HTTPError as e:
+	  return None
+      try:
+	  bs = BeautifulSoup(html.read(), 'html.parser')
+	  title = bs.body.h1
+      except AttributeError as e:
+	  return None
+  return title
+
+
+  title = getTitle('http://www.pythonscraping.com/pages/page1.html')
+  if title == None:
+      print('Title could not be found')
+  else:
+      print(title)
+
+#+end_src
+
+
+
+** capitulo 2 : Html analisis
+
+
+*** conceptos
+
+- atributos
+
+- parsing trees
+
+
+- clases en html
+
+
+- <tr> : es la fila de una tabla
+
+
+- <td> : es la celda de una tabla
+
+
+- parent
+
+
+- children
+
+
+- descendant
+
+*** funciones
+
+
+*** Idea 1 :
+
+
+imaginese que se quiere buscar cierto contenido en
+especifico, dentro de 20 tags o capas.
+
+
+
+#+begin_src python :results output
+  bs.find_all('table')[4].find_all('tr')[2].find('td')
+  .find_all('div')[1].find('a')
+#+end_src
+
+
+“Desde el HTML completo, toma la quinta tabla, luego la
+tercera fila, luego la primera celda, luego el segundo
+div y finalmente el primer link.”
+
+
+esto no es una buena practica, por que ante el más
+minimo cambio de la pagina, el web scraper se romperà
+
+el desarrolador puede agregar otra columna o otra tabla
+u otro div.
+
+se aprenderà en esta seccion a
+
+formas estandar y creativas de acceder a tags basado
+ en:
+
+- contenido
+
+
+- atributo
+
+
+- posicion
+
+
+- contexto
+
+
+- clases
+
+- keyword argument : son claves en textos que le puedes
+  pasar a la funcion find_all() para buscar en los atr-
+  ibutos de los tags.
+
+  esto es redundante porque puedes utilizar expresiones regulares
+  
+
+
+*** idea 2 : css class es util para diferencia dos tags exactos
+
+
+#+begin_src python :results output
+ nameList = bs.findAll('span', {'class':'green'})
+#+end_src
+
+toma dos argumentos, primero busca por tag, luego por
+clase. find_all() es una funcion bastante flexible
+
+
+OJO: clases es un atributo de un tag y es nuestro objetivo
+del capitulo
+
+pregunta: ¿ cuales son todos los atributos de una clase?
+
+
+tag tiene distintos metodos, el nombre y los atributos.
+
+los nombres o names son el el markup, la letra que
+da la estructura
+
+imprimir : name.get_tex() entrega el textos, separando
+los tags
+
+
+*** navigatin trees
+
+idea principal : dentro de un tag hay más tags. estos
+son los 'hijos' o descendientes.
+
+
+hasta hora supimos buscar los tags basado en su nombre.
+pero y si nos interesa su locación en el documento?
+
+
+**pregunta** : ¿ si quiero acceder a los costos, como lo tengo que hacer?
+
+tengo que filtrar por td, que son las celdas, pero tengo que buscar las numericas?
+
+como lo tendria que hacer viendo a los 'hijos'?
+
+seria buscar en cada tr, luego ver de alguna manera filtrar por texto, que contenga el '$'
+
+
+#+begin_src python :results output
+bs.find_all('tr',text = '$')
+#+end_src
+
+eso siempre y cuando se pueda acceder a los 'hijos'.
+
+de otra forma seria:
+
+#+begin_src python :results output
+bs.find_all('td',text = '$')
+#+end_src
+
+no... esto es un mal uso de text
+
+
+**** diseccionando funcion navigating trees
+
+
+
+*** idea 4
+
+- el + en expresiones regulares, sirve para ver si se repite por ejemplo, los caracteres de las condiciones
+  o si es unica
+
+
+
+**** Objetivo
+
+hallar la lista de precios + expresiones regulares
+
+
+los tr (filas) su hijo directo son los nombres, luego en un de sus descendientes, esta la celda cuyo hijo son los
+precios. ¿Si quisieramos automatizar este proceso como lo hariamos?
+
+
+***** Plan
+
+hallar todas las filas, de la tabla, talque tengan esta clase:
+
+#+begin_src python :results output
+bs.find_all('tr',{'class' : 'gift'})
+#+end_src
+
+lo guardamos en una variable e iteramos. En cada iteración buscaremos el hijo del tr y el descendiente del mismo.
+
+
+
+
+
+
+
+** Capitulo 3 : escribiendo web crawlers
+
+- web crawler : es un programa automatizado que navega por internet, cuyo objetivo es descargar contenido
+
+
+- paginas vs sitios : sitios se refiere a multiples paginas web con el mismo dominio
+
+
+en este capitulo nos concentraremos màs en ejemplos reales, ya que los scrapers van neveganndo por multiples paginas
+o sitios.
+
+*** Atravesando un solo dominio
+
+
+'http://en.wikipedia.org/wiki/Kevin_Bacon'
+
+desde esta pagina:
+
+- crear una lista de links
+
+paso 1 : descargar la pagina estatica( no servira)
+
+with open('warandpeace.html', 'wb') as archivo:
+    archivo.write(html.read())
